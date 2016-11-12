@@ -4,13 +4,16 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.15.2",
+    "btoa": "^1.1.2",
     "cf-deployment-tracker-client": "*",
     "cfenv": "1.0.x",
     "commander": "^2.6.0",
     "ejs": "^2.5.2",
     "express": "~4.x",
+    "express-ejs-layouts": "^2.2.0",
     "http-post": "^0.1.1",
     "http-proxy": "^1.8.1",
+    "path": "^0.12.7",
     "pg": "*",
     "pg-connection-string": "*"
   },

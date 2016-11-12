@@ -18,6 +18,9 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+var path = require('path');
+var expressLayouts = require('express-ejs-layouts');
+var btoa = require('btoa');
 
 app.use(bodyParser.urlencoded({
   extended: false
@@ -85,6 +88,12 @@ client.connect(function(err) {
 // We can now set up our web server. First up we set it to serve static pages
 app.use(express.static(__dirname + '/public'));
 
+app.set('views', path.join(__dirname, 'views'));
+app.engine('ejs', require('ejs').renderFile);
+app.set('view engine', 'ejs');
+app.set('layout', 'templates/layout');
+app.use(expressLayouts);
+
 app.put("/words", function(request, response) {
   // set up a new client using our config details
   var client = new pg.Client(config);
@@ -127,6 +136,51 @@ app.get("/words", function(request, response) {
   });
 
 });
+
+app.get('/index')
+
+// Read from the database when someone visits /words
+app.post("/login", function(request, response) {
+  // set up a new client using our config details
+  var client = new pg.Client(config);
+  // connect to the database
+  client.connect(function(err) {
+
+    if (err) throw err;
+
+    // execute a query on our database
+    // console.log("QUERY ",'select * from users where expirydate>now() where userid = \''+request.query.userid +'\' and password=\''+btoaConvert(request.query.password)+'\'');
+    client.query('select * from users where expirydate>now() and userid = \''+request.query.userid +'\' and password=\''+btoaConvert(request.query.password)+'\'', function (err, result) {
+      if (err) {
+       response.status(500).send(err);
+      } else {
+        if(result.rows.length>0)
+        {
+          request.session.loggedIn = true;
+          response.redirect('/index');
+        }
+      //  response.send(result.rows);
+      }
+
+    });
+
+  });
+
+});
+
+app.get("/test", function(request, response) {
+  response.render('testHello');
+});
+
+app.get("/btoa", function(request, response) {
+  response.render('testHello',{val:btoaConvert(request.query.password)});
+});
+
+var btoaConvert = function b64EncodeUnicode(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+}
 
 // Now we go and listen for a connection.
 app.listen(port);

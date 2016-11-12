@@ -1,0 +1,35 @@
+{
+    "name": "databaseApplication",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+      "body-parser": "^1.15.2",
+        "express": "~4.x",
+        "commander": "^2.6.0",
+        "http-post": "^0.1.1",
+        "http-proxy": "^1.8.1",
+        "cfenv": "1.0.x",
+        "pg": "*",
+    		"pg-connection-string": "*",
+        "cf-deployment-tracker-client": "*"
+    },
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/bharatlakhiyani/databaseApplication.git"
+    },
+    "author": "Bharat Lakhiyani",
+    "contributors": [
+      {
+        "name": "Bharat Lakhiyani",
+        "email": "blakhiya@nyit.edu"
+      }
+    ],
+    "bugs": {
+      "url": "https://github.com/bharatlakhiyani/databaseApplication/issues"
+    },
+    "license": "Restricted(Private)"
+}

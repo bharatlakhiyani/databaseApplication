@@ -202,9 +202,8 @@ app.post("/login", function(request, response) {
 
 if(process.env.NODE_ENV && process.env.NODE_ENV=='production')
 {
-  app.get('*',function(req,res){
-    res.redirect('https://csci760db.mybluemix.net'+req.url)
-  });
+  middleware = require("./enforceHttps.js"),
+  app.use(middleware.transportSecurity());
 }
 
 var btoaConvert = function b64EncodeUnicode(str) {

@@ -12,6 +12,7 @@
     "express": "~4.x",
     "express-ejs-layouts": "^2.2.0",
     "express-session": "^1.14.2",
+    "express-sslify": "^1.1.0",
     "http-post": "^0.1.1",
     "http-proxy": "^1.8.1",
     "path": "^0.12.7",

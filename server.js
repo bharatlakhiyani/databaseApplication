@@ -21,6 +21,22 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var expressLayouts = require('express-ejs-layouts');
 var btoa = require('btoa');
+var session = require('express-session');
+var sessionTimeout = 1800000; // set the expiration to be 30 minutes, ITSC 300
+var sessionOptions = {
+		name: 'bluepay.sid',
+		secret: 'd43jk3553kfdg4jjg8jdgfjd8jgfdgf',
+		resave: false,
+		saveUninitialized: true,
+		cookie: {
+			httpOnly: true,
+			secure: false,
+			maxAge: null,
+			expires: false
+		}
+};
+
+app.use(session(sessionOptions));
 
 app.use(bodyParser.urlencoded({
   extended: false
@@ -137,9 +153,22 @@ app.get("/words", function(request, response) {
 
 });
 
-app.get('/index')
+app.get('/index', function(request,response){
+  if(request.session.username)
+  {
+    response.render('index',{username:request.session.username});
+  } else {
+    response.redirect("/login");
+  }
+});
+
+
 
 // Read from the database when someone visits /words
+app.get("/login", function(request, response) {
+  response.render('login');
+});
+
 app.post("/login", function(request, response) {
   // set up a new client using our config details
   var client = new pg.Client(config);
@@ -150,14 +179,17 @@ app.post("/login", function(request, response) {
 
     // execute a query on our database
     // console.log("QUERY ",'select * from users where expirydate>now() where userid = \''+request.query.userid +'\' and password=\''+btoaConvert(request.query.password)+'\'');
-    client.query('select * from users where expirydate>now() and userid = \''+request.query.userid +'\' and password=\''+btoaConvert(request.query.password)+'\'', function (err, result) {
+    client.query('select * from users where expirydate>now() and userid = \''+request.body.username +'\' and password=\''+btoaConvert(request.body.password)+'\'', function (err, result) {
       if (err) {
        response.status(500).send(err);
       } else {
         if(result.rows.length>0)
         {
           request.session.loggedIn = true;
+          request.session.username = request.body.username;
           response.redirect('/index');
+        } else {
+          response.redirect('/login?error=Invalid credentials');
         }
       //  response.send(result.rows);
       }
@@ -168,13 +200,12 @@ app.post("/login", function(request, response) {
 
 });
 
-app.get("/test", function(request, response) {
-  response.render('testHello');
-});
-
-app.get("/btoa", function(request, response) {
-  response.render('testHello',{val:btoaConvert(request.query.password)});
-});
+if(process.env.NODE_ENV && process.env.NODE_ENV=='production')
+{
+  app.get('*',function(req,res){
+    res.redirect('https://csci760db.mybluemix.net'+req.url)
+  });
+}
 
 var btoaConvert = function b64EncodeUnicode(str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {

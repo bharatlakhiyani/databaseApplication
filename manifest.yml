@@ -3,7 +3,7 @@ applications:
   memory: 256M
   instances: 1
   domain: mybluemix.net
-  name: Compose for PostgreSQL-fg
+  name: csci760db
   host: csci760db
   space: dev
   disk_quota: 1024M

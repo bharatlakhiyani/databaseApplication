@@ -162,6 +162,91 @@ app.get('/index', function(request,response){
   }
 });
 
+app.get('/searchBooks', function(request,response){
+
+	//QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name from books b, author a, publishers p where b.authorid=a.authorid and p.publisherid=b.publisherid
+	//ENHANCD QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac from books b, author a, publishers p, lib_books lb, branch br where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid
+  if(request.session.cardNumber)
+  {
+		// set up a new client using our config details
+	  var client = new pg.Client(config);
+	  // connect to the database
+	  client.connect(function(err) {
+
+	    if (err) throw err;
+
+	    // execute a query on our database
+	    client.query('select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac from books b, author a, publishers p, lib_books lb, branch br where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid', function (err, result) {
+	      if (err) {
+	       	response.status(500).send(err);
+	      } else {
+    			response.render('allBooks',{books:result});
+				}
+			});
+		});
+  } else {
+    response.redirect("/login");
+  }
+});
+
+app.get('/reader', function(request,response){
+
+	//QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name from books b, author a, publishers p where b.authorid=a.authorid and p.publisherid=b.publisherid
+	//ENHANCD QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac from books b, author a, publishers p, lib_books lb, branch br where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid
+  if(request.session.cardNumber)
+  {
+		// set up a new client using our config details
+	  var client = new pg.Client(config);
+	  // connect to the database
+	  client.connect(function(err) {
+
+	    if (err) throw err;
+
+	    // execute a query on our database
+	    client.query('select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac from books b, author a, publishers p, lib_books lb, branch br where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid', function (err, result) {
+	      if (err) {
+	       	response.status(500).send(err);
+	      } else {
+    			response.render('reader',{cardNumber:request.session.cardNumber,books:result});
+				}
+			});
+		});
+  } else {
+    response.redirect("/login");
+  }
+});
+
+app.post("/verifyReader", function(request, response) {
+  // set up a new client using our config details
+  var client = new pg.Client(config);
+  // connect to the database
+  client.connect(function(err) {
+
+    if (err) throw err;
+
+    // execute a query on our database
+    // console.log("QUERY ",'select * from users where expirydate>now() where userid = \''+request.query.userid +'\' and password=\''+btoaConvert(request.query.password)+'\'');
+    client.query('select * from readers where cardnumber = \''+request.body.cardNumber +'\'', function (err, result) {
+      if (err) {
+       response.status(500).send(err);
+      } else {
+        if(result.rows.length>0)
+        {
+          request.session.loggedIn = true;
+          request.session.cardNumber = request.body.cardNumber;
+          response.redirect('/reader');
+        } else {
+          response.redirect('/login?error=Invalid credentials');
+        }
+      //  response.send(result.rows);
+      }
+
+    });
+
+  });
+
+});
+
 
 
 // Read from the database when someone visits /words

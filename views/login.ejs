@@ -12,18 +12,18 @@
   <div class="form">
 
       <ul class="tab-group">
-        <li class="tab active"><a href="#signup">Sign Up</a></li>
-        <li class="tab"><a href="#login">Log In</a></li>
+        <li class="tab active"><a href="#signup">Reader</a></li>
+        <li class="tab"><a href="#login">Administration</a></li>
       </ul>
 
       <div class="tab-content">
         <div id="signup">
-          <h1>Sign Up Library System</h1>
+          <h1>Library System</h1>
 
-          <form action="/" method="post">
+          <form action="/verifyReader" method="post">
 
           <div class="top-row">
-            <div class="field-wrap">
+            <!-- <div class="field-wrap">
               <label>
                 First Name<span class="req">*</span>
               </label>
@@ -35,21 +35,21 @@
                 Last Name<span class="req">*</span>
               </label>
               <input type="text"required autocomplete="off"/>
-            </div>
+            </div> -->
           </div>
 
           <div class="field-wrap">
             <label>
-              Email Address<span class="req">*</span>
+              Card Number<span class="req">*</span>
             </label>
-            <input type="email"required autocomplete="off"/>
+            <input type="text" name="cardNumber" required autocomplete="off"/>
           </div>
 
           <div class="field-wrap">
-            <label>
+            <!-- <label>
               Set A Password<span class="req">*</span>
             </label>
-            <input type="password"required autocomplete="off"/>
+            <input type="password"required autocomplete="off"/> -->
           </div>
 
           <button type="submit" class="button button-block"/>Get Started</button>
@@ -59,7 +59,7 @@
         </div>
 
         <div id="login">
-          <h1>Welcome Back!</h1>
+          <h1>Welcome Admin!</h1>
 
           <form method="post">
 

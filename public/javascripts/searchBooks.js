@@ -1,7 +1,7 @@
 
 $(document).ready(function() {
   // alert($('#dataOfBooks').html());
-  $('#allBooks').DataTable({
+  var table = $('#allBooks').DataTable({
         data: JSON.parse($('#dataOfBooks').html()),
         'bSort': true,
         "pageLength": 15,
@@ -15,8 +15,8 @@ $(document).ready(function() {
           { data: 'publishername', title:'Publisher'},
           { data: 'branchname', title:'Branch', defaultContent:'N/A'},
           { data: 'noc', title:'Total Copies', defaultContent:'N/A'},
-          { data: 'ac', title:'Available', defaultContent:'N/A'}
-          // { data: null, title:'Action', defaultContent:'<i class="fa  fa-chevron-circle-down admin-datatable-actions"></i>'},
+          { data: 'ac', title:'Available', defaultContent:'N/A'},
+          { data: null, title:'Check-out', defaultContent:'<i class="fa  fa-check-circle book-datatable-actions"></i>'},
         ],
         columnDefs: [
           { "width": "5%", "targets": 0 },
@@ -48,9 +48,37 @@ $(document).ready(function() {
                 }
             }
         },
-        "aoColumnDefs": [
-            { "bSortable": false, "aTargets": [ 0 ] }
-        ],
-        "aaSorting": [[ 1, 'asc' ]]
+        // "aoColumnDefs": [
+        //     { "bSortable": false, "aTargets": [ 0 ] }
+        // ],
+        "aaSorting": [[ 2, 'asc' ]]
   });
+
+  $('.book-datatable-actions').click(function(){
+    var child = $(this).parent().parent().children()[0];
+    var rowId = child._DT_CellIndex.row;
+    var data = JSON.parse($('#dataOfBooks').html());
+    if(confirm("Press Ok to confirm reservation for following book. \n\nBook name:"+data[rowId].title+"\nBranch: "+data[rowId].branchname+"\nISBN: "+data[rowId].isbn))
+    {
+      $.ajax({
+            url: "/checkoutBook",
+            type: 'PUT',
+            data: data[rowId],
+            dataType: 'json',
+            success: function(result) {
+              if(result.error)
+              {
+                alert(result.error);
+              } else if(result.success){
+                alert(result.success);
+                location.reload();
+              } else {
+                alert(JSON.stringify(result));
+              }
+            }
+        });
+    }
+    // alert(JSON.stringify(data[rowId]))
+  });
+
 });

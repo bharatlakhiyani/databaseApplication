@@ -190,7 +190,7 @@ app.put('/checkoutBook', function(request,response){
 												response.status(500).send(err1);
 											} else {
 												client.end();
-												response.send({"success":"Book has been checked out"});
+												response.send({"success":"Book has been checked out."});
 											}
 										});
 									}

@@ -31,8 +31,7 @@ var sessionOptions = {
 	cookie: {
 		httpOnly: true,
 		secure: false,
-		maxAge: null,
-		expires: false
+		maxAge: 30000
 	}
 };
 

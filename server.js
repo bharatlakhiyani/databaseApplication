@@ -30,7 +30,7 @@ var sessionOptions = {
 	saveUninitialized: true,
 	cookie: {
 		httpOnly: true,
-		secure: false,
+		// secure: false,
 		maxAge: 30000
 	}
 };

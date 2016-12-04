@@ -4,7 +4,7 @@ $(document).ready(function() {
   var table = $('#fines').DataTable({
         data: JSON.parse($('#dataOfFines').html()),
         'bSort': true,
-        "pageLength": 15,
+        "pageLength": 25,
         columns: [
           { data: 'bookid', title:'No'},
           // { data: 'bookid', title:'Book Id'},

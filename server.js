@@ -29,9 +29,7 @@ var sessionOptions = {
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
-		httpOnly: true,
-		// secure: false,
-		maxAge: 30000
+		maxAge: 60000
 	}
 };
 
@@ -140,6 +138,101 @@ app.get("/words", function(request, response) {
 
 });
 
+
+app.get('/services/authors', function(request,response){
+	if(request.session.username)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("select authorname from author", function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					client.end();
+					var authors=[];
+					for(var i=0;i<result.rows.length;i++)
+					{
+						authors.push(result.rows[i].authorname);
+					}
+					response.send(authors);
+				}
+			});
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
+
+app.get('/services/publishers', function(request,response){
+	if(request.session.username)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("select name from publishers", function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					client.end();
+					var publishers=[];
+					for(var i=0;i<result.rows.length;i++)
+					{
+						publishers.push(result.rows[i].name);
+					}
+					response.send(publishers);
+				}
+			});
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
+app.get('/services/branches', function(request,response){
+	if(request.session.username)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("select name from branch", function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					client.end();
+					var branches=[];
+					for(var i=0;i<result.rows.length;i++)
+					{
+						branches.push(result.rows[i].name);
+					}
+					response.send(branches);
+				}
+			});
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
 app.get('/index', function(request,response){
 	if(request.session.username)
 	{
@@ -243,11 +336,186 @@ app.put('/checkoutBook', function(request,response){
 	}
 });
 
+app.get('/addBook',function(request,response){
+	if(request.session.username){
+		response.render('addBook');
+	} else {
+		response.redirect("/login");
+	}
+});
+
+app.post('/addBook',function(request,response){
+	if(request.session.username){
+
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query('select * from branch where name like \''+request.body.branch+'\'', function (err, branches) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					if(branches.rows.length>0)
+					{
+						var libid=branches.rows[0].libid;
+						getOrInsertPublisher(request.body.publisher,function(publisherid){
+							getOrInsertAuthor(request.body.author, function(authorId){
+								// response.send(authorId);
+								client.query('INSERT into books(title, isbn, publishdate, authorid, publisherid) VALUES (\''+request.body.title+'\',\''+request.body.isbn+'\',\''+request.body.pbdate+'\','+authorId+','+publisherid+')', function(errInsert, bookAdd){
+									//select * from books where title LIKE 'Programming Languages' and isbn like 'ISBN 12345678901' and books.authorid =2 and books.publisherid=1
+									if (errInsert) {
+										client.end();
+										response.status(500).send(errInsert);
+									} else {
+										client.query("select * from books where title LIKE '"+request.body.title+"' and isbn like '"+request.body.isbn+"' and books.authorid ="+authorId+" and books.publisherid="+publisherid, function (err, getBookAfterInsert) {
+											if (err) {
+												client.end();
+												response.status(500).send(err);
+											} else {
+												var bookId = getBookAfterInsert.rows[0].bookid;
+												client.query("insert into lib_books(libid, bookid, noc, ac) VALUES ("+libid+","+bookId+","+request.body.noc+","+request.body.noc+")", function(errInsert, bookAdd){
+													if (errInsert) {
+														client.end();
+														response.status(500).send(err);
+													} else {
+														response.render('index');
+													}
+												});
+											}
+										});
+									}
+								});
+							});
+						});
+					} else {
+						client.query('insert into branch(name, location) VALUES (\''+request.body.branch+'\', \''+request.body.branch+'\')', function(err2, addBranch){
+							if (err2) {
+								client.end();
+								response.status(500).send(err2);
+							} else {
+								client.query('select * from branch where name like \''+request.body.branch+'\'', function (err, getBranchAfterInsert) {
+									if (err) {
+										client.end();
+										response.status(500).send(err);
+									} else {
+										if(getBranchAfterInsert.rows.length>0)
+										{
+											var libid=getBranchAfterInsert.rows[0].libid;
+											getOrInsertPublisher(request.body.publisher,function(publisherid){
+												getOrInsertAuthor(request.body.author, function(authorId){
+													response.send(authorId);
+												});
+											});
+										}
+									}
+								});
+							}
+						});
+					}
+				}
+			});
+		});
+
+		// response.send(request.body);
+	} else {
+		response.redirect("/login");
+	}
+});
+
+function getOrInsertPublisher(publisherName, cb){
+	var client = new pg.Client(config);
+	// execute a query on our database
+	client.connect(function(err) {
+
+		if (err) throw err;
+
+		client.query('select * from publishers where name like \''+publisherName+'\'', function (err, publishers) {
+			if (err) {
+				client.end();
+				// response.status(500).send(err);
+			} else {
+				if(publishers.rows.length>0)
+				{
+					var publisherid=publishers.rows[0].publisherid;
+					cb(publisherid);
+				} else {
+					client.query('insert into publishers(name, address) VALUES (\''+publisherName+'\', \''+publisherName+'\')', function(err2, addPublisher){
+						if (err2) {
+							client.end();
+							// response.status(500).send(err2);
+						} else {
+							client.query('select * from publishers where name like \''+publisherName+'\'', function (err, getPublisherAfterInsert) {
+								if (err) {
+									client.end();
+									// response.status(500).send(err);
+								} else {
+									if(getPublisherAfterInsert.rows.length>0)
+									{
+										var publisherid=getPublisherAfterInsert.rows[0].publisherid;
+										cb(publisherid);
+									}
+								}
+							});
+						}
+					});
+				}
+			}
+		});
+	});
+}
+
+function getOrInsertAuthor(authorName, cb){
+	var client = new pg.Client(config);
+	// execute a query on our database
+	client.connect(function(err) {
+
+		if (err) throw err;
+
+		client.query('select * from author where authorname like \''+authorName+'\'', function (err, authors) {
+			if (err) {
+				client.end();
+				// response.status(500).send(err);
+			} else {
+				if(authors.rows.length>0)
+				{
+					var authorId=authors.rows[0].authorid;
+					cb(authorId);
+				} else {
+					client.query('insert into author(authorname) VALUES (\''+authorName+'\')', function(err2, addPublisher){
+						if (err2) {
+							client.end();
+							// response.status(500).send(err2);
+						} else {
+							client.query('select * from author where authorname like \''+authorName+'\'', function (err, getAuthorAfterInsert) {
+								if (err) {
+									client.end();
+									// response.status(500).send(err);
+								} else {
+									if(getAuthorAfterInsert.rows.length>0)
+									{
+										var authorId=getAuthorAfterInsert.rows[0].authorid;
+										cb(authorId);
+									}
+								}
+							});
+						}
+					});
+				}
+			}
+		});
+	});
+}
+
 app.get('/searchBooks', function(request,response){
 
 	//QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name from books b, author a, publishers p where b.authorid=a.authorid and p.publisherid=b.publisherid
 	//ENHANCD QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac, lb.lbid, lb.libid from books b, author a, publishers p, lib_books lb, branch br where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid
-	if(request.session.cardNumber)
+	if(request.session.cardNumber || request.session.username)
 	{
 		// set up a new client using our config details
 		var client = new pg.Client(config);

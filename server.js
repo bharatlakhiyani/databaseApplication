@@ -138,6 +138,36 @@ app.get("/words", function(request, response) {
 
 });
 
+app.get('/addReader',function(request,response){
+	if(request.session.username){
+		response.render('addReader');
+	} else {
+		response.redirect("/login");
+	}
+});
+
+app.post('/addReader',function(request,response){
+	if(request.session.username){
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("INSERT INTO readers(name, address, phone, cardnumber) VALUES ('"+request.body.name+"','"+request.body.address+"','"+request.body.phone+"','"+request.body.cNumber+"')", function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					response.render('index');
+				}
+			});
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
 
 app.get('/services/authors', function(request,response){
 	if(request.session.username)
@@ -170,6 +200,33 @@ app.get('/services/authors', function(request,response){
 	}
 });
 
+app.get('/services/cardExistence', function(request,response){
+	if(request.session.username)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("select * from readers where cardnumber='"+request.query.cardNumber+"'", function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					if(result.rows.length>0)
+					{
+						response.send({exists:true});
+					} else {
+						response.send({exists:false});
+					}
+				}
+			});
+		});
+	}
+});
 
 app.get('/services/publishers', function(request,response){
 	if(request.session.username)

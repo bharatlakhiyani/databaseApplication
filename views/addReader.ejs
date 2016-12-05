@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="/javascripts/addReader.js"></script>
+<center>
+  <h3>Add Reader</h3>
+</center>
+<hr/>
+
+<div class="col-md-4"></div>
+<div class="col-md-7">
+  <form name="form" method="post">
+    <div class="ui-widget row">
+      <label for="name" class="col-md-3">Name: </label>
+      <input class="col-md-4" id="name" name="name" type="text" required="true">
+    </div>
+
+    <br/>
+    <div class="ui-widget row">
+      <label for="address" class="col-md-3">Address: </label>
+      <input class="col-md-4" id="address" name="address" type="text" required="true">
+    </div>
+
+    <br/>
+    <div class="ui-widget row">
+      <label for="phone" class="col-md-3">Phone: </label>
+      <input class="col-md-4" id="phone" name="phone" type="text" required="true">
+    </div>
+    <br/>
+    <div class="ui-widget row">
+      <label for="cNumber" class="col-md-3">Card Number: </label>
+      <input class="col-md-4" id="cNumber" name="cNumber" type="text" required="true" readonly="true">
+    </div>
+    <br/>
+    <div class="ui-widget row">
+      <div class="col-md-2"></div>
+      <input id="submitForm" type="submit" value="Add Reader" required="true" class="col-md-3">
+    </div>
+  </form>
+</div>

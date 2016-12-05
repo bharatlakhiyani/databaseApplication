@@ -138,6 +138,32 @@ app.get("/words", function(request, response) {
 
 });
 
+app.get('/bookReturn', function(request, response){
+	// select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac, lb.lbid, lb.libid, bw.brid from books b, author a, publishers p, lib_books lb, branch br, borrowed bw where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid and bw.actualreturn is null and bw.lbid=lb.lbid and bw.readerid=1
+	if(request.session.cardNumber)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("select lb.lbid, br.brid, b.bookid, b.title, b.isbn, brc.name, a.authorname, br.borrowdate, br.returndate AS ExpectedReturnDate, case when date_part('day',age(br.returndate, now()))<0 then date_part('day',age(br.returndate, now()))-1 else date_part('day',age(br.returndate, now())) end as actualDaysLeft , abs(date_part('day',age(br.returndate, now())))+1 as daysleft, case when date_part('day',age(br.returndate, now()))<0 then (abs(date_part('day',age(br.returndate, now())))+1)*0.20 else 0 end AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.actualreturn is null and  br.readerid ="+request.session.readerId, function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					response.render('bookReturn',{dataOfBorrowedBooks:result.rows});
+				}
+			});
+		});
+	} else{
+		response.redirect('/login');
+	}
+});
+
 app.get('/addReader',function(request,response){
 	if(request.session.username){
 		response.render('addReader');
@@ -303,7 +329,7 @@ app.get('/watchFines',function(request,response){
 	//QUERY select b.bookid, b.title, b.isbn, brc.name, a.authorname, br.borrowdate, br.returndate AS ExpectedReturnDate, date_part('day',age(br.returndate, now())) as daysleft from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.readerid = 1
 	//Enhanced query select b.bookid, b.title, b.isbn, brc.name, a.authorname, br.borrowdate, br.returndate AS ExpectedReturnDate, date_part('day',age(br.returndate, now())) as daysleft, abs(date_part('day',age(br.returndate, now())))*0.20 AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.readerid = 1 and date_part('day',age(br.returndate, now()))<0
 
-	var query="select b.bookid, b.title, b.isbn, brc.name, a.authorname, br.borrowdate, br.returndate AS ExpectedReturnDate, abs(date_part('day',age(br.returndate, now())))+1 as daysleft, (abs(date_part('day',age(br.returndate, now())))+1)*0.20 AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.readerid = "+request.session.readerId+" and date_part('day',age(br.returndate, now()))<0";
+	var query="select b.bookid, b.title, b.isbn, brc.name, a.authorname, br.borrowdate, br.returndate AS ExpectedReturnDate, abs(date_part('day',age(br.returndate, now())))+1 as daysleft, (abs(date_part('day',age(br.returndate, now())))+1)*0.20 AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.actualreturn is null and br.readerid = "+request.session.readerId+" and date_part('day',age(br.returndate, now()))<0";
 
 	if(request.session.cardNumber)
 	{
@@ -329,6 +355,41 @@ app.get('/watchFines',function(request,response){
 		response.redirect("/login");
 	}
 
+});
+
+app.put('/bookReturn', function(request,response){
+
+	//QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name from books b, author a, publishers p where b.authorid=a.authorid and p.publisherid=b.publisherid
+	if(request.session.cardNumber)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			// console.log('select * from lib_books where lbid=4 and ac>1'+JSON.stringify(request.body));
+			// console.log('select * from lib_books where lbid='+request.body.lbid);
+			client.query('update lib_books set ac=ac+1 where lbid='+request.body.lbid, function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					client.query('UPDATE borrowed SET actualreturn=now() WHERE brid='+request.body.brid, function (err, result) {
+						if (err) {
+							client.end();
+							response.status(500).send(err);
+						} else {
+							client.end();
+							response.send({"success":"Book has been returned."});
+						}
+					});
+				}
+			});
+		});
+	}
 });
 
 app.put('/checkoutBook', function(request,response){

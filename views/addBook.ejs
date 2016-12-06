@@ -2,13 +2,30 @@
 <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> -->
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="/javascripts/addBook.js"></script>
-<center>
-  <h3>Add Book</h3>
-</center>
-<hr/>
+<style>header {
+    background-color:black;
+    color:white;
+ 
+    padding:8px;	 
+}
+footer {
+    background-color:black;
+    color:white;
+    clear:both;
+    text-align:center;
+    padding:5px;	 	 
+}
+</style>
+<header>
+  <center><h3>Add Book</h3></center>
+  <b>
+ <a href="javascript:history.go(-1);"><font color="white">Previous Page</font></a>
+  <hr/>
+</header>
+<br/>
 
 <div class="col-md-4"></div>
-<div class="col-md-7">
+<div class="col-md-7" background-color="#eeeeee;">
   <form name="form" method="post">
     <div class="ui-widget row">
       <label for="branch" class="col-md-3">Branch: </label>
@@ -57,3 +74,4 @@
     </div>
   </form>
 </div>
+

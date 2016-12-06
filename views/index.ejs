@@ -1,32 +1,66 @@
 <script src="/javascripts/administration.js"></script>
-<center>
-  <h3>Administration</h3>
-</center>
-<hr/>
-<div class="row">
-  <center>
-    <div class="col-md-4">
-      <a href="/addBook">Add Book</a>
-    </div>
-    <div class="col-md-4">
-      <a href="/searchBooks">Search Books</a>
-    </div>
-    <div class="col-md-4">
-      <a href="/addReader">Add Reader</a>
-    </div>
-  </center>
+<style>
+ li {list-style-type:none;}
+ header {
+    background-color:black;
+    color:white;
+    
+    padding:8px;	 
+}
+nav {
+    line-height:30px;
+    background-color:#eeeeee;
+    height:600px;
+    width:200px;
+    float:left;
+    padding:5px;	      
+}
+section {
+    width:350px;
+    float:left;
+    padding:10px;	 	 
+}
+footer {
+    background-color:black;
+    color:white;
+    clear:both;
+    text-align:center;
+    padding:5px;	 	 
+}
+</style>
+<header>
+  <center><h3>Administration menu</h3></center>
+  <b><a href="/login"><text-align:left><font color="white">login</font></text-align></left></a></b>
+  &nbsp
+  <b><a href="/login"><text-align:left><font color="white">signout</font></text-align></left></a></b>
+  <hr/>
+</header>
+
+<nav>
+<div class="menu">
+
+		<ul>
+			<li><a href="/addBook"><font color="black">Add Book</font></a></li>
+			<br>
+			<li><a href="/searchBooks" ><font color="black">Search Books</font></a></li>
+			<br>
+			<li><a href="/addReader" ><font color="black">Add Reader </font></a></li>
+			<br>
+			<li><a href="/searchBooks" ><font color="black">Bookook Reserve</font></a></li>
+			<br>
+			<li><a href="/watchFines" ><font color="black">Compute Fine</font></a></li>
+			<br>
+			<li><a href="/searchBooks"><font color="black">All researved by me</font></a></li>
+		</ul>
+ 
 </div>
-<div style="height:35px"></div>
-<div class="row">
-  <center>
-    <div class="col-md-4">
-      <a href="/searchBooks">Book Reserve</a>
-    </div>
-    <div class="col-md-4">
-      <a href="/watchFines">Compute Fine</a>
-    </div>
-    <div class="col-md-4">
-      <a href="/searchBooks">All researved by me</a>
-    </div>
-  </center>
-</div>
+</nav>
+<section>
+<p>wellcome</p>
+</section>
+
+<footer> 
+coptyright @123 
+</footer>
+
+  

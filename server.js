@@ -462,6 +462,8 @@ app.get('/index', function(request,response){
 	if(request.session.username){
 		var queryTotalFine = "select sum((abs(date_part('day',age(br.returndate, now())))+1)*0.20) AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.actualreturn is not null and date_part('day',age(br.returndate, now()))<0";
 		var queryTotalFineTobe="select sum((abs(date_part('day',age(br.returndate, now())))+1)*0.20) AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.actualreturn is null and date_part('day',age(br.returndate, now()))<0";
+		var queryBorrowed= "select count(*) as borrowed from borrowed where borrowdate=current_date";
+		var queryReserved="SELECT count(*) as reserved from reservations where rdate=current_date";
 		// set up a new client using our config details
 		var client = new pg.Client(config);
 		// connect to the database
@@ -478,10 +480,24 @@ app.get('/index', function(request,response){
 					client.query(queryTotalFineTobe, function (err1, resultTobe) {
 						if (err1) {
 							client.end();
-							response.status(500).send(err);
+							response.status(500).send(err1);
 						} else {
-							client.end();
-							response.render("index1", {username:request.session.username, totalFine:result.rows[0].fine, totalFineTobe:resultTobe.rows[0].fine});
+							client.query(queryBorrowed, function (err2, resultBorrowed) {
+								if (err2) {
+									client.end();
+									response.status(500).send(err2);
+								} else {
+									client.query(queryReserved, function (err3, resultReserved) {
+										if (err3) {
+											client.end();
+											response.status(500).send(err3);
+										} else {
+											client.end();
+											response.render("index1", {username:request.session.username, totalFine:result.rows[0].fine, totalFineTobe:resultTobe.rows[0].fine,totalBorrowed:resultBorrowed.rows[0].borrowed,totalReserved:resultReserved.rows[0].reserved});
+										}
+									});
+								}
+							});
 						}
 					});
 				}

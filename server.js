@@ -50,6 +50,7 @@ var port = process.env.VCAP_APP_PORT || 8080;
 // Then we'll pull in the database client library
 var pg = require('pg');
 
+
 // Now lets get cfenv and ask it to parse the environment variable
 var cfenv = require('cfenv');
 var appenv = cfenv.getAppEnv();
@@ -319,7 +320,7 @@ app.get('/services/branches', function(request,response){
 app.get('/index', function(request,response){
 	if(request.session.username)
 	{
-		response.render('index',{username:request.session.username});
+		response.render('index1',{username:request.session.username});
 	} else {
 		response.redirect("/login");
 	}
@@ -453,6 +454,98 @@ app.put('/checkoutBook', function(request,response){
 		response.redirect("/login");
 	}
 });
+
+app.get('/reserveBook',function(request,response){
+	//QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name from books b, author a, publishers p where b.authorid=a.authorid and p.publisherid=b.publisherid
+	//ENHANCD QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac, lb.lbid, lb.libid from books b, author a, publishers p, lib_books lb, branch br where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid
+	if(request.session.cardNumber || request.session.username)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query('select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac, lb.lbid, lb.libid from books b, author a, publishers p, lib_books lb, branch br where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid', function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					client.end();
+					response.render('reserveBook',{books:result});
+				}
+			});
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
+app.put('/reserveBook', function(request,response){
+
+	//QUERY select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name from books b, author a, publishers p where b.authorid=a.authorid and p.publisherid=b.publisherid
+	if(request.session.cardNumber)
+	{
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			// console.log('select * from lib_books where lbid=4 and ac>1'+JSON.stringify(request.body));
+			// console.log('select * from lib_books where lbid='+request.body.lbid);
+			client.query('select * from lib_books where lbid='+request.body.lbid, function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					client.query('select * from borrowed where readerid = '+request.session.readerId+' and actualreturn is NULL', function(err3,result3){
+						if(result3.rows.length >= 0 && result3.rows.length<10)
+						{
+							if(result.rows.length > 0 && result.rows[0].ac>0)
+							{
+								client.query('update lib_books set ac=ac-1 where lbid='+request.body.lbid, function (err2, result1) {
+									if (err2) {
+										client.end();
+										response.status(500).send(err2);
+									} else {
+										client.query("insert into reservations(bookid, readerid, rdate) VALUES ("+request.body.bookid+","+request.session.readerId+",now())", function(err1,result2){
+											if(err1) {
+												client.end();
+												response.status(500).send(err1);
+											} else {
+												client.end();
+												response.send({"success":"Book has been Reserved."});
+											}
+										});
+									}
+								});
+							} else if(result.rows.length > 0 && result.rows[0].ac<1){
+								client.end();
+								response.send({"error":"Sorry, Book found but not available for reservation."});
+							}
+							else {
+								client.end();
+								response.send({"error":"Sorry, Book was not found."});
+							}
+						} else {
+							client.end();
+							response.send({"error":"Sorry, You have reached your maximum limit to reserve or borrow books."});
+						}
+					});
+				}
+			});
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
+
 
 app.get('/addBook',function(request,response){
 	if(request.session.username){

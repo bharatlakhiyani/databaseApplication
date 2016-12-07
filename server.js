@@ -320,7 +320,7 @@ app.get('/services/branches', function(request,response){
 app.get('/index', function(request,response){
 	if(request.session.username)
 	{
-		response.render('index',{username:request.session.username});
+		response.render('index1',{username:request.session.username});
 	} else {
 		response.redirect("/login");
 	}

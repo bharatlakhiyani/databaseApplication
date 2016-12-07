@@ -191,6 +191,34 @@ app.get("/top10Readers", function(request, response) {
 	}
 });
 
+//select br.lbid, b.title, bc.name, count(*) as numberoftimes from borrowed br, lib_books lb, books b, branch bc WHERE  br.lbid=lb.lbid and lb.bookid=b.bookid and bc.libid=lb.libid GROUP BY br.lbid, lb.bookid, b.title, bc.name order by count(*) desc
+
+app.get("/top10Books", function(request, response) {
+	if(request.session.username){
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		var query="select br.lbid, b.title, bc.name, count(*) as numberoftimes from borrowed br, lib_books lb, books b, branch bc WHERE  br.lbid=lb.lbid and lb.bookid=b.bookid and bc.libid=lb.libid GROUP BY br.lbid, lb.bookid, b.title, bc.name order by count(*) desc";
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query(query, function (err, result) {
+				if (err) {
+					response.status(500).send(err);
+				} else {
+					response.render('top10Books',{top10Books:result.rows});
+				}
+
+			});
+
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
 
 app.get("/allBranches", function(request, response) {
 	if(request.session.username){

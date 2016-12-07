@@ -22,6 +22,7 @@ var path = require('path');
 var expressLayouts = require('express-ejs-layouts');
 var btoa = require('btoa');
 var session = require('express-session');
+var cron = require('node-cron');
 var sessionTimeout = 1800000; // set the expiration to be 30 minutes, ITSC 300
 var sessionOptions = {
 	name: 'bluepay.sid',
@@ -982,7 +983,26 @@ app.post("/verifyReader", function(request, response) {
 
 });
 
+cron.schedule('10 18 * * *', function(){
+  console.log('running a task everyday 6:10 PM');
+	//update reservations set borrowedstatus='C' where borrowedstatus is NULL ;
+	var client = new pg.Client(config);
+	// connect to the database
+	client.connect(function(err) {
 
+		if (err) throw err;
+
+		// execute a query on our database
+		client.query("update reservations set borrowedstatus='C' where borrowedstatus is NULL", function (err, result) {
+			if (err) {
+				// response.status(500).send(err);
+				client.end();
+			} else {
+				console.log("CRON JOB EXECUTED: with query update reservations set borrowedstatus='C' where borrowedstatus is NULL");
+			}
+		});
+	});
+});
 
 // Read from the database when someone visits /words
 app.get("/login", function(request, response) {

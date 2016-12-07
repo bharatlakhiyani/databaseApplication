@@ -1,66 +1,7 @@
-<style>
- li {list-style-type:none;}
- header {
-    background-color:black;
-    color:white;
-    padding:8px;
-}
-nav {
-    line-height:30px;
-    background-color:#eeeeee;
-    height:600px;
-    width:200px;
-    float:left;
-    padding:5px;
-}
-section {
-    width:350px;
-    float:left;
-    padding:10px;
-}
-footer {
-    background-color:black;
-    color:white;
-    clear:both;
-    text-align:center;
-    padding:5px;
-}
-</style>
-<header>
- <center> <h3>Reader Menu</h3></center>
-  <br>
-  <b>
-  <a href="/login"><text-align:left><font color="white">login</font></text-align></left></a>
-  </b>
-  <b>
-  &nbsp
-  <a href="/login"><text-align:left><font color="white">sign out</font></text-align></left></a>
-  </b>
-  <hr/>
-</header>
 
-<nav>
-<div class="menu">
+<% include headreader %>
 
-		<ul>
-			<li><a href="/searchBooks"><font color="black">Search</font></a></li>
-			<br>
-			<li><a href="/searchBooks" ><font color="black">Book Checkout</font></a></li>
-			<br>
-			<li><a href="/bookReturn" ><font color="black">Book Return </font></a></li>
-			<br>
-			<li><a href="/watchFines" ><font color="black">Compute Fines</font></a></li>
-			<br>
-			<li><a href="/reserveBook" ><font color="black">Reserve Book</font></a></li>
-			<br>
-			<li><a href="/myReservations"><font color="black">All Reserved by Me</font></a></li>
-		</ul>
 
-</div>
-</nav>
-<section>
-<p>wellcome back</p>
-</section>
-<footer>
-coptyright @123
-</footer>
+
+
+<% include footer %>

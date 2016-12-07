@@ -1,19 +1,12 @@
+<% include head %>
+
 <script src="/javascripts/top10Books.js"></script>
-<style>header {
-    background-color:black;
-    color:white;
 
-    padding:8px;
-}
-
-</style>
 <header>
 <center>
   <h3>Top 10 Books</h3>
 </center>
-<b>
- <a href="javascript:history.go(-1);"><font color="white">Previous Page</font></a>
-<hr/>
+
 </header>
 <br/>
 <div id="top10Books" class="hidden">
@@ -21,3 +14,4 @@
 </div>
 <table id="top10BooksTable" class="row-border dt-responsive">
 </table>
+<% include footer %>

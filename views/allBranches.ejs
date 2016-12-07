@@ -1,19 +1,10 @@
+<% include head %>
+
 <script src="/javascripts/allBranches.js"></script>
-<style>header {
-    background-color:black;
-    color:white;
-
-    padding:8px;
-}
-
-</style>
 <header>
 <center>
   <h3>Branch Information</h3>
 </center>
-<b>
- <a href="javascript:history.go(-1);"><font color="white">Previous Page</font></a>
-<hr/>
 </header>
 <br/>
 <div id="branchInformation" class="hidden">
@@ -21,3 +12,4 @@
 </div>
 <table id="branchTable" class="row-border dt-responsive">
 </table>
+<% include footer %>

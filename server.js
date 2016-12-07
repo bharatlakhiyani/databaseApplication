@@ -164,6 +164,34 @@ app.get('/services/getAverageFine', function(request,response){
 	}
 });
 
+//select borrowed.readerid , count(*) AS NumberOfBooks, readers.name, readers.cardnumber  from borrowed , readers where borrowed.readerid=readers.readerid group by borrowed.readerid, readers.name, readers.cardnumber order by count(*) DESC
+
+app.get("/top10Readers", function(request, response) {
+	if(request.session.username){
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query('select borrowed.readerid , count(*) AS NumberOfBooks, readers.name, readers.cardnumber  from borrowed , readers where borrowed.readerid=readers.readerid group by borrowed.readerid, readers.name, readers.cardnumber order by count(*) DESC', function (err, result) {
+				if (err) {
+					response.status(500).send(err);
+				} else {
+					response.render('watchTop10Readers',{top10Readers:result.rows});
+				}
+
+			});
+
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
+
 app.get("/allBranches", function(request, response) {
 	if(request.session.username){
 		// set up a new client using our config details

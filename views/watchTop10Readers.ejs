@@ -1,0 +1,23 @@
+<script src="/javascripts/watchTop10Readers.js"></script>
+<style>header {
+    background-color:black;
+    color:white;
+
+    padding:8px;
+}
+
+</style>
+<header>
+<center>
+  <h3>Top 10 Readers</h3>
+</center>
+<b>
+ <a href="javascript:history.go(-1);"><font color="white">Previous Page</font></a>
+<hr/>
+</header>
+<br/>
+<div id="top10Readers" class="hidden">
+<%=JSON.stringify(top10Readers)%>
+</div>
+<table id="top10ReadersTable" class="row-border dt-responsive">
+</table>

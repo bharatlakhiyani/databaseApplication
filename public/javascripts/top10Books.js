@@ -39,7 +39,7 @@ $(document).ready(function() {
         // "aoColumnDefs": [
         //     { "bSortable": false, "aTargets": [ 0 ] }
         // ],
-        "aaSorting": [[ 2, 'asc' ]]
+        "aaSorting": [[ 1, 'desc' ]]
   });
 
   // $('.book-datatable-actions').click(function(){

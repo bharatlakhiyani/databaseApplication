@@ -139,6 +139,56 @@ app.get("/words", function(request, response) {
 
 });
 
+app.get('/services/getAverageFine', function(request,response){
+	if(request.session.username){
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("select avg((abs(date_part('day',age(br.returndate, now())))+1)*0.20) AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.actualreturn is not null and date_part('day',age(br.returndate, now()))<0", function (err, result) {
+				if (err) {
+					response.status(500).send(err);
+				} else {
+					response.send(result.rows);
+				}
+
+			});
+
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
+app.get("/allBranches", function(request, response) {
+	if(request.session.username){
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query('SELECT * FROM branch ORDER BY name ASC', function (err, result) {
+				if (err) {
+					response.status(500).send(err);
+				} else {
+					response.render('allBranches',{branchInformation:result.rows});
+				}
+
+			});
+
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
 app.get('/bookReturn', function(request, response){
 	// select b.bookid, b.title, b.isbn, b.publishdate, a.authorname, p.name AS PublisherName, br.name AS branchName ,lb.noc, lb.ac, lb.lbid, lb.libid, bw.brid from books b, author a, publishers p, lib_books lb, branch br, borrowed bw where b.authorid=a.authorid and p.publisherid=b.publisherid and lb.libid = br.libid and b.bookid=lb.bookid and bw.actualreturn is null and bw.lbid=lb.lbid and bw.readerid=1
 	if(request.session.cardNumber)
@@ -156,6 +206,7 @@ app.get('/bookReturn', function(request, response){
 					client.end();
 					response.status(500).send(err);
 				} else {
+					client.end();
 					response.render('bookReturn',{dataOfBorrowedBooks:result.rows});
 				}
 			});
@@ -187,6 +238,7 @@ app.post('/addReader',function(request,response){
 					client.end();
 					response.status(500).send(err);
 				} else {
+					client.end();
 					response.render('index');
 				}
 			});
@@ -243,6 +295,7 @@ app.get('/services/cardExistence', function(request,response){
 					client.end();
 					response.status(500).send(err);
 				} else {
+					client.end();
 					if(result.rows.length>0)
 					{
 						response.send({exists:true});

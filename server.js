@@ -165,6 +165,35 @@ app.get('/services/getAverageFine', function(request,response){
 	}
 });
 
+
+//select * from reservations where readerid = 1
+app.get("/myReservations", function(request, response) {
+	if(request.session.readerId){
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query("select r.reservationid, r.rdate, b.title, r.borrowedstatus from reservations r, readers rd, books b where  r.rdate=current_date and rd.readerid=r.readerid and b.bookid=r.bookid and r.readerid="+request.session.readerId, function (err, result) {
+				if (err) {
+					response.status(500).send(err);
+				} else {
+					response.render('myReservations',{myReservations:result.rows});
+				}
+
+			});
+
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
+
+
 //select borrowed.readerid , count(*) AS NumberOfBooks, readers.name, readers.cardnumber  from borrowed , readers where borrowed.readerid=readers.readerid group by borrowed.readerid, readers.name, readers.cardnumber order by count(*) DESC
 
 app.get("/top10Readers", function(request, response) {

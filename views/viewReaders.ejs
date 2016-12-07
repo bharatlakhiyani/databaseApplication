@@ -1,4 +1,4 @@
-<script src="/javascripts/top10Books.js"></script>
+<script src="/javascripts/viewReaders.js"></script>
 <style>header {
     background-color:black;
     color:white;
@@ -9,15 +9,15 @@
 </style>
 <header>
 <center>
-  <h3>Top 10 Books</h3>
+  <h3>Top 10 Readers</h3>
 </center>
 <b>
  <a href="javascript:history.go(-1);"><font color="white">Previous Page</font></a>
 <hr/>
 </header>
 <br/>
-<div id="top10Books" class="hidden">
-<%=JSON.stringify(top10Books)%>
+<div id="viewReaders" class="hidden">
+<%=JSON.stringify(viewReaders)%>
 </div>
-<table id="top10BooksTable" class="row-border dt-responsive">
+<table id="viewReadersTable" class="row-border dt-responsive">
 </table>

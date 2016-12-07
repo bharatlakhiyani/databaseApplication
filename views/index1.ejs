@@ -1,3 +1,12 @@
 <% include head %>
-Welcome
+
+<h3>Welcome, <%=username%></h3>
+<div class="row" style="height:50px"></div>
+<div class="col-md-3">
+  Total Fine Collected: $<%=parseFloat(totalFine).toFixed(2)%>
+</div>
+<div class="col-md-3">
+  Total Fine To be Collected: $<%=parseFloat(totalFineTobe).toFixed(2)%>
+</div>
+
 <% include footer %>

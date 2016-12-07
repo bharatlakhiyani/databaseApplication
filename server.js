@@ -219,6 +219,32 @@ app.get("/top10Books", function(request, response) {
 	}
 });
 
+app.get("/viewReaders", function(request, response) {
+	if(request.session.username){
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		var query="select * from readers";
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query(query, function (err, result) {
+				if (err) {
+					response.status(500).send(err);
+				} else {
+					response.render('viewReaders',{viewReaders:result.rows});
+				}
+
+			});
+
+		});
+	} else {
+		response.redirect("/login");
+	}
+});
+
 
 app.get("/allBranches", function(request, response) {
 	if(request.session.username){
@@ -426,10 +452,42 @@ app.get('/services/branches', function(request,response){
 	}
 });
 
+app.get('/logout', function(request,response){
+	request.session.destroy();
+	response.redirect('/login');
+});
+
 app.get('/index', function(request,response){
-	if(request.session.username)
-	{
-		response.render('index1',{username:request.session.username});
+	if(request.session.username){
+		var queryTotalFine = "select sum((abs(date_part('day',age(br.returndate, now())))+1)*0.20) AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.actualreturn is not null and date_part('day',age(br.returndate, now()))<0";
+		var queryTotalFineTobe="select sum((abs(date_part('day',age(br.returndate, now())))+1)*0.20) AS fine from books b, borrowed br, lib_books lb, branch brc, author a where b.bookid=lb.bookid and lb.libid=brc.libid and lb.lbid=br.lbid and a.authorid=b.authorid and br.actualreturn is null and date_part('day',age(br.returndate, now()))<0";
+		// set up a new client using our config details
+		var client = new pg.Client(config);
+		// connect to the database
+		client.connect(function(err) {
+
+			if (err) throw err;
+
+			// execute a query on our database
+			client.query(queryTotalFine, function (err, result) {
+				if (err) {
+					client.end();
+					response.status(500).send(err);
+				} else {
+					client.query(queryTotalFineTobe, function (err1, resultTobe) {
+						if (err1) {
+							client.end();
+							response.status(500).send(err);
+						} else {
+							client.end();
+							response.render("index1", {username:request.session.username, totalFine:result.rows[0].fine, totalFineTobe:resultTobe.rows[0].fine});
+						}
+					});
+				}
+
+			});
+
+		});
 	} else {
 		response.redirect("/login");
 	}
